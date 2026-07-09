@@ -67,7 +67,7 @@
   .hright { display:flex; align-items:center; gap:12px; }
 
   /* ---------- Layout ---------- */
-  main { display:grid; grid-template-columns:290px 1fr 400px; gap:16px; padding:16px; height:calc(100vh - 66px); }
+  main { display:grid; grid-template-columns:264px minmax(320px,1fr) minmax(340px,1.1fr) 320px; gap:14px; padding:16px; height:calc(100vh - 66px); }
   .col { min-height:0; display:flex; flex-direction:column; gap:14px; }
   .panel { background:linear-gradient(180deg, rgba(17,26,56,.72), rgba(14,20,44,.72));
     border:1px solid var(--line); border-radius:var(--r-lg); box-shadow:var(--shadow-lg); }
@@ -108,6 +108,12 @@
     font-family:ui-monospace,"Cascadia Code",monospace; font-size:13px; line-height:1.8; color:#c3cdec; }
   #cmdPreview .ph { color:var(--faint); font-style:italic; font-family:system-ui,sans-serif; }
   #cmdPreview .skwrap { color:#a78bfa; }
+  #thinkStream { flex:1; overflow-y:auto; margin:0; padding:14px 18px; white-space:pre-wrap; word-break:break-word;
+    font-size:13px; line-height:1.75; color:#9aa8bd; border-left:2px solid rgba(139,92,246,.5); }
+  #thinkStream .thinking-hd { display:flex; align-items:center; gap:7px; color:#c4b5fd; font-weight:700; font-size:12px; margin-bottom:8px; }
+  #thinkStream .thinking-hd .ic { width:14px; height:14px; }
+  #thinkStream .thinking-hd .live { color:var(--cyan); }
+  #thinkStream .tbody { white-space:pre-wrap; }
   .execline { display:flex; align-items:center; gap:8px; margin:0 12px 12px; padding:9px 13px; font-size:13px; font-weight:600;
     border-radius:var(--r-sm); border:1px solid var(--line-hi); background:#0d1730; color:var(--muted); }
   .execline.ok { color:#6ee7b7; background:rgba(52,211,153,.08); border-color:rgba(52,211,153,.35); }
@@ -157,7 +163,7 @@
   .tag.new { color:#06251c; background:var(--green); }
   .tag.rev { color:#c9b8ff; background:rgba(139,92,246,.16); border:1px solid rgba(139,92,246,.4); }
   #log { flex:1; overflow-y:auto; padding:16px; display:flex; flex-direction:column; gap:12px; }
-  #histPanel { max-height:34%; display:flex; flex-direction:column; }
+  #histPanel { flex:1; display:flex; flex-direction:column; min-height:0; }
   #sessions { overflow-y:auto; padding:8px 10px; display:flex; flex-direction:column; gap:6px; }
   #sessions .sess { position:relative; width:100%; text-align:left; cursor:pointer; font-size:12px;
     background:var(--card); border:1px solid var(--line); border-radius:var(--r-sm); padding:8px 30px 8px 12px; transition:.15s; }
@@ -299,8 +305,14 @@
   .modal .mb code { background:#0b1220; border:1px solid var(--line); border-radius:4px; padding:1px 5px; font-family:ui-monospace,monospace; font-size:.9em; }
   .modal .mb ul { padding-left:1.3em; margin:.4em 0; }
 
-  @media (max-width:1080px) {
+  @media (max-width:1280px) {
+    main { grid-template-columns:240px 1fr 1fr; }
+    #histCol { grid-column:1 / -1; }
+    #histPanel { max-height:300px; }
+  }
+  @media (max-width:900px) {
     main { grid-template-columns:1fr; height:auto; min-height:calc(100vh - 66px); }
+    #histCol { grid-column:auto; }
     #histPanel { max-height:none; }
     #preview { width:100vw; }
   }
@@ -336,10 +348,11 @@
   <section class="col" id="center">
     <div class="panel" id="previewCard">
       <div class="phead">
-        <span class="t"><span id="icPen"></span>指令预览（将自动发送给 AI 执行）</span>
+        <span class="t"><span id="icPen"></span><span id="previewTitle">指令预览（将自动发送给 AI 执行）</span></span>
         <button class="abtn" id="btnClearMod" type="button" hidden><span id="icBack"></span>取消模块</button>
       </div>
       <pre id="cmdPreview"></pre>
+      <div id="thinkStream" hidden></div>
       <div class="execline" id="execLine" hidden></div>
       <form id="f" class="composer">
         <textarea id="q" placeholder="选择左侧模块后，在这里填写具体要求；或直接自由对话…"></textarea>
@@ -358,7 +371,7 @@
     </div>
   </section>
 
-  <!-- RIGHT: output + history -->
+  <!-- OUTPUT -->
   <section class="col">
     <div class="panel" id="outCard">
       <div class="phead">
@@ -373,6 +386,10 @@
       <div id="log"></div>
       <div id="files"></div>
     </div>
+  </section>
+
+  <!-- HISTORY (own column) -->
+  <section class="col" id="histCol">
     <div class="panel" id="histPanel">
       <div class="phead"><span class="t"><span id="icHist"></span>历史记录</span><span class="count" id="histCount"></span></div>
       <div id="sessions"><span class="note" style="padding:10px 12px;">加载中…</span></div>
@@ -437,61 +454,61 @@ const setIc=(id,name)=>{ const el=document.getElementById(id); if(el) el.innerHT
 // 每个模块绑定一个 skill；选中后所有发送都强制"请使用 <skill> 技能"。
 const MODULE_GROUPS = [
   { group:"顶刊论文", mods:[
-    { id:"nature-writing",  title:"顶刊写作 Agent", sub:"Nature 级论文撰写全流程", skill:"nature-writing", icon:"flask",
+    { id:"nature-writing",  title:"顶刊写作", sub:"Nature 级论文撰写全流程", skill:"nature-writing", icon:"flask",
       intro:"撰写 Nature/顶刊级别的科研论文。", label:"写作要求",
       reqs:["按目标期刊风格组织 IMRaD 结构","论点—证据—逻辑清晰，避免夸大","术语统一、可直接投稿"] },
-    { id:"nature-polishing",title:"顶刊润色 Agent", sub:"语言/逻辑打磨到投稿级", skill:"nature-polishing", icon:"sparkle",
+    { id:"nature-polishing",title:"顶刊润色", sub:"语言/逻辑打磨到投稿级", skill:"nature-polishing", icon:"sparkle",
       intro:"把稿件语言与逻辑打磨到顶刊投稿水平。", label:"润色范围",
       reqs:["保留原意与术语、引用不动","消除机器腔与冗余","增强论证连贯性"] },
-    { id:"nature-statistics",title:"统计审查 Agent", sub:"p值/样本量/多重比较审查", skill:"nature-statistics", icon:"sigma",
+    { id:"nature-statistics",title:"统计审查", sub:"p值/样本量/多重比较审查", skill:"nature-statistics", icon:"sigma",
       intro:"审查并规范稿件的统计报告。", label:"审查对象",
       reqs:["核对检验选择与假设","检查样本量/重复数/多重比较","给出可直接替换的统计小节文字"] },
-    { id:"nature-reviewer", title:"模拟审稿 Agent", sub:"Nature 风格审稿意见", skill:"nature-reviewer", icon:"search",
+    { id:"nature-reviewer", title:"模拟审稿", sub:"Nature 风格审稿意见", skill:"nature-reviewer", icon:"search",
       intro:"以 Nature 审稿人视角给出预审意见。", label:"送审内容",
       reqs:["3 份独立审稿报告 + 交叉综述","指出新颖性/严谨性/可复现性问题","给出可执行的修改建议"] },
-    { id:"nature-figure",   title:"投稿配图 Agent", sub:"森林图/KM/火山图，300dpi+", skill:"nature-figure", icon:"image",
+    { id:"nature-figure",   title:"投稿配图", sub:"森林图/KM/火山图，300dpi+", skill:"nature-figure", icon:"image",
       intro:"制作投稿级科研配图。", label:"作图需求",
       reqs:["先定图的结论与证据逻辑","matplotlib/seaborn 出图，300dpi+ 矢量","符合目标期刊图规范"] },
   ]},
   { group:"论文与研究", mods:[
-    { id:"paper-writer",  title:"论文写作 Agent", sub:"IMRAD 格式论文写作全流程", skill:"paper-writer", icon:"doc",
+    { id:"paper-writer",  title:"论文写作", sub:"IMRAD 格式论文写作全流程", skill:"paper-writer", icon:"doc",
       intro:"撰写医学/科学论文。", label:"写作要求",
       reqs:["管理从文献到投稿的写作流程","生成符合期刊要求的稿件","包含所有必要章节（IMRAD：引言、方法、结果、讨论）","充分利用已有研究数据中的实验结果和发现"] },
-    { id:"paper-spine",   title:"论文拆解 Agent", sub:"拆解范文骨架、结构迁移", skill:"paper-spine", icon:"book",
+    { id:"paper-spine",   title:"论文拆解", sub:"拆解范文骨架、结构迁移", skill:"paper-spine", icon:"book",
       intro:"拆解范文的论证骨架并迁移到我的稿子。", label:"拆解对象",
       reqs:["抽取范文的结构与逻辑主线","对照我的材料做结构迁移","产出可执行的写作骨架"] },
-    { id:"academic-research-suite", title:"深度研究 Agent", sub:"多源检索+对抗核查+成文", skill:"academic-research-suite", icon:"search",
+    { id:"academic-research-suite", title:"深度研究", sub:"多源检索+对抗核查+成文", skill:"academic-research-suite", icon:"search",
       intro:"对一个问题做多源深度研究并成文。", label:"研究问题",
       reqs:["多源检索 + 交叉/对抗式核查","关键论断标注来源","输出带引用的研究报告"] },
-    { id:"survey-builder",title:"文献综述 Agent", sub:"多路检索+去重+归类+综合综述", skill:"survey-builder", icon:"book",
+    { id:"survey-builder",title:"文献综述", sub:"多路检索+去重+归类+综合综述", skill:"survey-builder", icon:"book",
       intro:"围绕主题撰写叙述性文献综述。", label:"综述主题",
       reqs:["检索并按主题聚类文献、建证据表","背景→现状→分歧→空白→展望 成文","逐句落引用，不虚构文献"] },
   ]},
   { group:"基金申请", mods:[
-    { id:"fund-background-writer", title:"立项依据 Agent", sub:"NSFC 立项依据撰写", skill:"fund-background-writer", icon:"gift",
+    { id:"fund-background-writer", title:"立项依据", sub:"NSFC 立项依据撰写", skill:"fund-background-writer", icon:"gift",
       intro:"撰写国自然标书的立项依据。", label:"课题方向",
       reqs:["科学问题清晰、意义充分","国内外研究现状与空白","逻辑递进到本项目必要性"] },
-    { id:"fund-literature-review-writer", title:"研究现状 Agent", sub:"标书文献综述/研究现状", skill:"fund-literature-review-writer", icon:"search",
+    { id:"fund-literature-review-writer", title:"研究现状", sub:"标书文献综述/研究现状", skill:"fund-literature-review-writer", icon:"search",
       intro:"撰写标书的研究现状/文献综述部分。", label:"综述范围",
       reqs:["梳理国内外研究进展","突出争议与未解决问题","为立项依据提供证据支撑"] },
-    { id:"fund-research-content-writer", title:"研究内容 Agent", sub:"研究内容/目标/方案", skill:"fund-research-content-writer", icon:"target",
+    { id:"fund-research-content-writer", title:"研究内容", sub:"研究内容/目标/方案", skill:"fund-research-content-writer", icon:"target",
       intro:"撰写标书的研究目标、内容与方案。", label:"研究设想",
       reqs:["目标—内容—方案对应清晰","可行且有创新点","与技术路线呼应"] },
-    { id:"fund-technical-route-writer", title:"技术路线 Agent", sub:"技术路线/可行性", skill:"fund-technical-route-writer", icon:"route",
+    { id:"fund-technical-route-writer", title:"技术路线", sub:"技术路线/可行性", skill:"fund-technical-route-writer", icon:"route",
       intro:"撰写标书的技术路线与可行性分析。", label:"技术设想",
       reqs:["技术路线分步、逻辑闭环","可行性与风险应对","与研究内容一一对应"] },
   ]},
   { group:"校对与排版", mods:[
-    { id:"reference-check", title:"引用核查 Agent", sub:"查假引用/核 DOI-PMID", skill:"reference-check", icon:"shield",
+    { id:"reference-check", title:"引用核查", sub:"查假引用/核 DOI-PMID", skill:"reference-check", icon:"shield",
       intro:"核查参考文献真实性、揪出假引用。", label:"核查内容",
       reqs:["逐条对 Crossref/Europe PMC 核实","标出不存在/张冠李戴/虚构的条目","输出核查结论清单"] },
-    { id:"humanize-academic", title:"去 AI 味 Agent", sub:"去机器腔，保术语与引用", skill:"humanize-academic", icon:"sparkle",
+    { id:"humanize-academic", title:"去 AI 味", sub:"去机器腔，保术语与引用", skill:"humanize-academic", icon:"sparkle",
       intro:"给稿件去除 AI 机器腔。", label:"待润色文本",
       reqs:["中英双语去机器腔","保留术语、引用与数字不变","通过不变量校验"] },
-    { id:"render-pdf-doc", title:"PDF 排版 Agent", sub:"Markdown → 出版级 PDF", skill:"render-pdf-doc", icon:"pdf",
+    { id:"render-pdf-doc", title:"PDF 排版", sub:"Markdown → 出版级 PDF", skill:"render-pdf-doc", icon:"pdf",
       intro:"把 Markdown 排成出版级 PDF。", label:"排版内容",
       reqs:["pandoc+xelatex 出 PDF，支持中文","自动排版表格与图","保持标题层级与页码"] },
-    { id:"render-docx", title:"Word 排版 Agent", sub:"Markdown → 投稿版 .docx", skill:"render-docx", icon:"doc",
+    { id:"render-docx", title:"Word 排版", sub:"Markdown → 投稿版 .docx", skill:"render-docx", icon:"doc",
       intro:"把 Markdown 转成投稿版 Word。", label:"排版内容",
       reqs:["输出 .docx（多数医学期刊要 Word）","保留标题/表格/图","样式整洁可直接投稿"] },
   ]},
@@ -509,6 +526,15 @@ const filesEl = document.getElementById("files")
 const cmdPreview = document.getElementById("cmdPreview")
 const execLine = document.getElementById("execLine")
 const resultMeta = document.getElementById("resultMeta")
+const previewTitle = document.getElementById("previewTitle")
+const thinkStream = document.getElementById("thinkStream")
+// 指令预览栏 ↔ 实时思考流 切换
+function enterThinking(){
+  thinkStream.hidden=false; cmdPreview.style.display="none"; previewTitle.textContent="思考过程 · 实时"
+  thinkStream.innerHTML='<div class="thinking-hd">'+ic("brain")+'<span>模型思考中</span><span class="live">…</span></div><div class="tbody">正在连接…</div>'
+}
+function setThinking(txt){ const b=thinkStream.querySelector(".tbody"); if(b){ b.textContent=txt||"思考中…"; thinkStream.scrollTop=thinkStream.scrollHeight } }
+function exitThinking(){ thinkStream.hidden=true; cmdPreview.style.display=""; previewTitle.textContent="指令预览（将自动发送给 AI 执行）" }
 let activeStop = null
 stopBtn.addEventListener("click", ()=>{ if(activeStop) activeStop() })
 
@@ -769,15 +795,14 @@ function sendMessage(text){
   const w=log.querySelector(".welcome"); if(w) w.remove()
   sendBtn.disabled=true; document.body.classList.add("streaming")
   setExec("run", (currentModule?("正在执行 "+currentModule.skill+" …"):"执行中 …"))
+  enterThinking()
   add("user",text)
   const turn=document.createElement("div");turn.className="msg bot turn"
   const skillsEl=document.createElement("div");skillsEl.className="skills"
   const toolsD=document.createElement("details");toolsD.className="act tools-d";toolsD.hidden=true
   toolsD.innerHTML="<summary>"+ic("wrench")+' 工具调用 <span class="cnt"></span></summary><div class="tbody"></div>'
-  const thinkD=document.createElement("details");thinkD.className="act think-d";thinkD.hidden=true
-  thinkD.innerHTML="<summary>"+ic("brain")+' 思考过程</summary><div class="rbody"></div>'
   const answer=document.createElement("div");answer.className="answer";answer.innerHTML='<span class="typing"><i></i><i></i><i></i></span>'
-  turn.append(skillsEl,toolsD,thinkD,answer)
+  turn.append(skillsEl,toolsD,answer)
   log.appendChild(turn);log.scrollTop=log.scrollHeight
 
   const toolRows=new Map(),seenSkills=new Set(),reason=new Map()
@@ -792,7 +817,7 @@ function sendMessage(text){
   const finalize=note=>{
     if(finished)return;finished=true
     es.close();sendBtn.disabled=false;sendBtn.hidden=false;stopBtn.hidden=true;activeStop=null;document.body.classList.remove("streaming")
-    if(!thinkD.hidden)thinkD.querySelector("summary").innerHTML=ic("brain")+" 思考过程"
+    exitThinking()
     toolRows.forEach(r=>r.classList.remove("live"))
     if(note){if(!gotText&&!painted)answer.textContent="";const n=document.createElement("div");n.className="note";n.textContent=note;answer.appendChild(n);setExec("err",note.replace(/^[⚠⏹]\s*/,""))}
     else if(!gotText){answer.textContent="(无文本输出)";setExec("ok","执行完成")}
@@ -814,8 +839,7 @@ function sendMessage(text){
   })
   es.addEventListener("reasoning",ev=>{
     const d=JSON.parse(ev.data);reason.set(d.id,d.text)
-    thinkD.hidden=false;thinkD.querySelector(".rbody").textContent=[...reason.values()].filter(Boolean).join("\n\n")
-    thinkD.querySelector("summary").innerHTML=ic("brain")+' 思考中<span class="live">…</span>';follow()
+    setThinking([...reason.values()].filter(Boolean).join("\n\n"))
   })
   es.addEventListener("text",ev=>{if(!painted){gotText=true;answer.textContent=JSON.parse(ev.data);follow()}})
   es.addEventListener("final",ev=>{const t=JSON.parse(ev.data).text;if(t&&!painted){gotText=true;answer.textContent=t}paintAnswer();follow()})
