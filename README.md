@@ -11,6 +11,34 @@
 - 上传目录 `uploads/`，产出目录 `outputs/`。
 - 项目根 `AGENTS.md`（OpenCode）/ `CLAUDE.md`（Claude Code）只是**项目说明 + 几条通用硬规矩**，不是调度器。
 
+## 快速开始（一键安装）
+
+**先决条件**：`git`、**Node.js ≥ 18**、**OpenCode CLI**（`npm i -g opencode-ai`）并配好一个模型（`opencode auth login`，本项目默认 `deepseek/deepseek-v4-pro`）。Python **无需预装**——`install` 脚本会用 winget（Windows）/ apt（Linux）自动装 3.12。
+
+```bash
+# 1) 取代码
+git clone https://github.com/imwei25/ma-an-ping.git
+cd ma-an-ping
+
+# 2) 一键装环境：建项目根 .venv + 装全部技能依赖
+#    -WithPdf / --with-pdf 连 pandoc + xelatex 一起装（render-pdf-doc / ppt-master 出件需要，推荐带上）
+#    Windows：
+powershell -ExecutionPolicy Bypass -File install.ps1 -WithPdf
+#    Linux / macOS：
+bash install.sh --with-pdf
+
+# 3) 起 Web 网关，浏览器打开 http://localhost:3100（本机免登录）
+#    Windows：
+powershell -ExecutionPolicy Bypass -File start.ps1
+#    Linux / macOS：
+bash start.sh
+```
+
+> **给 AI 代理的一键安装**（在 Claude Code / OpenCode 里，把下面这段直接发给它执行）：
+> 「克隆 `https://github.com/imwei25/ma-an-ping.git` 并进入目录，按 README 的「快速开始」依次执行 install（带 `-WithPdf` / `--with-pdf`）与 start；装完打开 `http://localhost:3100` 自检返回 HTTP 200。若缺 Node/OpenCode 先 `npm i -g opencode-ai`；若模型未登录，提示我运行 `opencode auth login` 再继续。」
+
+装好后想用 Claude Code 直接调这些技能：`install.ps1 -LinkClaude`（或 `install.sh --link-claude`）会把技能复制到 `~/.claude/skills/`。
+
 ## 技能套件（20 个）
 
 | 方向 | 技能 | 说明 | 来源 |
@@ -41,7 +69,7 @@
 > **占位**技能（`survey-builder`）已装好说明与兜底流程，但要完全可用还需补一步（换源），详见其 `SKILL.md`。
 > 排版技能 `render-pdf-doc` / `render-docx` 依赖 **pandoc**（+ `render-pdf-doc` 还要 **xelatex** 与 CJK 字体）——用 `install.ps1 -WithPdf` / `install.sh --with-pdf` 一并装好。
 
-## 一键安装（Python 统一走**项目根 `.venv`**）
+## 安装细节与选项（Python 统一走**项目根 `.venv`**）
 
 ```powershell
 # Windows 本地
