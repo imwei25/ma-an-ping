@@ -146,7 +146,8 @@ def check_mirror(base):
         # 引用脚本存在性：只要该镜像里任一技能提供了这个脚本即算通过
         # （允许 research-scan 引用 literature-download/fetch.py 这类跨技能调用）
         for helper in ("fetch.py", "search.py", "build_docx.py", "pubstyle.py", "verify_refs.py"):
-            if helper in text and helper not in helpers_present:
+            # 文件名边界匹配：避免把 image_search.py 误判成引用了 search.py
+            if re.search(r"(?<![\w-])" + re.escape(helper), text) and helper not in helpers_present:
                 errs.append(f"[missing-script] {sk} 提到 {helper} 但整个镜像里都找不到")
     return errs, names
 

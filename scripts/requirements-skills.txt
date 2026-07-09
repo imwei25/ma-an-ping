@@ -48,6 +48,20 @@ pdfplumber         # 从 PDF 抽取文字 / 表格
 # ---- paperconan（论文源数据完整性核查）：提供 `paperconan` CLI ----
 paperconan[all]    # 数值异常信号扫描 + pdf/docx 表格解析；依赖 python-calamine（读 .xls/.xlsx）
 
+# ---- ppt-master（文档→可编辑 PPTX）核心依赖 ----
+python-pptx        # 生成原生可编辑 PPTX
+XlsxWriter         # 图表数据嵌入
+svglib             # SVG→PNG 后备（纯 Python；cairosvg 更好但需系统 cairo，未装）
+mammoth            # .docx → Markdown
+markdownify        # HTML → Markdown
+ebooklib           # .epub → Markdown
+nbconvert          # .ipynb → Markdown
+curl_cffi          # 抓网页时绕过 TLS 指纹屏蔽（如公众号），可选但已装
+flask              # 本地 SVG 标注编辑器（scripts/svg_editor）
+edge-tts           # 逐页旁白音频（可选功能）
+# 可选·需自备 key：AI 配图后端 google-genai（Gemini，IMAGE_BACKEND=gemini）——用时再 pip install
+# google-genai
+
 # ---- fund-literature-review-writer（基金综述检索）：需自备 key / 可能被墙，可选 ----
 scholarly          # Google Scholar 抓取（无需 key，但易被限流）
 exa-py             # Exa 检索（需 EXA_API_KEY）

@@ -1,6 +1,6 @@
 # 科研写作技能套件（skills/）
 
-本目录是一组**独立的科研 / 医学写作技能**（19 个），**没有顶层主控 / 路由**——每个技能靠自己 `<名>/SKILL.md` 里的 `description` 自行触发，agent 命中哪个用哪个。仓库根的 `AGENTS.md` / `CLAUDE.md` 只是项目说明与几条通用硬规矩，不是调度器。
+本目录是一组**独立的科研 / 医学写作技能**（20 个），**没有顶层主控 / 路由**——每个技能靠自己 `<名>/SKILL.md` 里的 `description` 自行触发，agent 命中哪个用哪个。仓库根的 `AGENTS.md` / `CLAUDE.md` 只是项目说明与几条通用硬规矩，不是调度器。
 
 ## 技能清单
 - **顶刊论文**：`nature-writing`、`nature-polishing`、`nature-statistics`、`nature-reviewer`、`nature-figure`
@@ -9,6 +9,7 @@
 - **基金标书**：`fund-background-writer`、`fund-literature-review-writer`、`fund-research-content-writer`、`fund-technical-route-writer`
 - **文稿核查**：`reference-check`（查假引用）、`humanize-academic`（去 AI 味）、`paperconan`（源数据完整性核查 / 科研诚信）
 - **排版出件**：`render-pdf-doc`（md→PDF，pandoc+xelatex）、`render-docx`（md→Word）
+- **演示制作**：`ppt-master`（文档→原生可编辑 PPTX，SVG 多角色流水线）
 - **基础设施**：`env-setup`（建 `.venv`、装依赖）
 - 另有 `_shared/`：Nature 系技能共用片段资源，**不是独立技能**。
 

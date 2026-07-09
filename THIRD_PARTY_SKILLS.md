@@ -19,6 +19,7 @@
 | `fund-technical-route-writer` | [HuiyuLi-2000/Chinese-Grant-Writer-Skills](https://github.com/HuiyuLi-2000/Chinese-Grant-Writer-Skills) | `skills/fund-technical-route-writer` | 见上游 LICENSE |
 | `render-pdf-doc` | [Aperivue/medsci-skills](https://github.com/Aperivue/medsci-skills) | `skills/render-pdf-doc`（Markdown→PDF，pandoc+xelatex） | MIT |
 | `paperconan` | [zixixr/paperconan](https://github.com/zixixr/paperconan) | `skills/paperconan`（论文源数据完整性核查，包 `paperconan` CLI） | 见上游 LICENSE |
+| `ppt-master` | [hugohe3/ppt-master](https://github.com/hugohe3/ppt-master) | `skills/ppt-master`（文档→原生可编辑 PPTX） | MIT |
 
 ## 本仓库自建 / 保留的技能（非 vendored）
 - `reference-check`（查假引用 / 核 DOI-PMID）、`humanize-academic`（去 AI 味）、`render-docx`（Markdown→投稿版 `.docx`，走 pandoc）、`env-setup`（环境自举）：来自本套件母项目，随本项目保留。
@@ -31,6 +32,7 @@
 4. `academic-research-suite`：删除了内部 `.github/` 等无关目录。
 5. `render-pdf-doc`：删除了 `tests/` 测试夹具，保留 SKILL.md / scripts / references / templates。
 6. `paperconan`：仅取上游的 `skills/paperconan/`（SKILL.md + references，未带 `src/` 源码）；顶部加「本仓库运行环境」块，说明 `paperconan` CLI 已装进 `.venv`、跳过原文第 0 步的安装/询问。CLI 由 `pip install "paperconan[all]"` 提供（见 requirements）。
+7. `ppt-master`：取上游的 `skills/ppt-master/`（SKILL.md + scripts + templates + references + workflows），**删除了 44M 的图片风格对比库 `references/ai-image-comparison/`**（人看的风格预览图，无界面文本 Agent 用不上；`strategist.md` 内相关链接失效，无碍）。保留了 `templates/icons/`（11k+ SVG 图标，供流水线按名检索）。顶部加「本仓库运行环境」块（说明核心依赖已装进 `.venv`、AI 配图/旁白/编辑器为可选）。
 
 ## 未采用
 - **LaTeX Writer**（[EvolvingLMMs-Lab/lmms-lab-writer](https://github.com/EvolvingLMMs-Lab/lmms-lab-writer)）：上游是一个完整的前端应用（apps/desktop·web·video 单仓库），**不是 skill 包**，无法按本套件的 `SKILL.md` 约定装入，故未采用。
@@ -44,6 +46,7 @@
 - `academic-research-suite` / nature 文字类技能：无 pip 依赖。
 - `render-pdf-doc` / `render-docx`：脚本走标准库，靠**系统 pandoc**（`render-pdf-doc` 另需 **xelatex** + CJK 字体）出件，由 `-WithPdf` / `--with-pdf` 安装。
 - `paperconan`：`paperconan[all]`（含 `python-calamine` 读 .xls/.xlsx、`pdfplumber`/`python-docx` 解析 PDF/Word 表格），提供 `paperconan` 命令行；已并入 `requirements-skills.txt`。
+- `ppt-master`：核心 `python-pptx` / `XlsxWriter` / `svglib` / `reportlab` / `mammoth` / `markdownify` / `ebooklib` / `nbconvert` / `curl_cffi` / `flask` / `edge-tts`（已并入 requirements）。可选：`cairosvg`（比 svglib 好，但需系统 cairo，未装）、`google-genai`（AI 配图，需 Gemini key，未装）。
 
 ## 保留声明
 各上游仓库的版权与许可声明随技能目录保留；本文件即为对本仓库改动的说明。使用前请核对各上游仓库的 LICENSE 原文。

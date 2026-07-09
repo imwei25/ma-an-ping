@@ -12,6 +12,7 @@
 - **基金申请（中文标书）**：`fund-background-writer`、`fund-literature-review-writer`、`fund-research-content-writer`、`fund-technical-route-writer`
 - **文稿核查**：`reference-check`（查假引用 / 核 DOI-PMID）、`humanize-academic`（去 AI 味润色）、`paperconan`（论文源数据完整性核查：扫 .xlsx/.csv/PDF 表格的数值异常信号，PubPeer / 科研诚信准备——只报信号不下结论）
 - **排版出件**：`render-pdf-doc`（Markdown→出版级 PDF，pandoc+xelatex，含中文排版）、`render-docx`（Markdown→投稿版 `.docx`）
+- **演示制作**：`ppt-master`（把 PDF/DOCX/URL/Markdown 转成原生可编辑 PPTX——真 DrawingML 形状/文本框/图表/动画；含 11k+ SVG 图标库与模板）
 - **基础设施**：`env-setup`（建项目根 `.venv`、装依赖）
 
 各技能是否需要串联（例如写完论文再核查引用、综述后再去 AI 味），由你按当下任务临时决定，不存在固定流水线。

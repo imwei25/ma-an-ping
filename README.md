@@ -11,7 +11,7 @@
 - 上传目录 `uploads/`，产出目录 `outputs/`。
 - 项目根 `AGENTS.md`（OpenCode）/ `CLAUDE.md`（Claude Code）只是**项目说明 + 几条通用硬规矩**，不是调度器。
 
-## 技能套件（19 个）
+## 技能套件（20 个）
 
 | 方向 | 技能 | 说明 | 来源 |
 |---|---|---|---|
@@ -33,6 +33,7 @@
 | 数据核查 | `paperconan` | 论文源数据表数值异常信号扫描（.xlsx/.csv/PDF），科研诚信 / PubPeer 准备（只报信号不下结论） | vendored ᵛ |
 | 排版(PDF) | `render-pdf-doc` | Markdown→出版级 PDF（pandoc+xelatex，含中文排版） | vendored ᵛ |
 | 排版(Word) | `render-docx` | Markdown→投稿版 `.docx`（多数医学期刊要 Word） | 本项目保留 |
+| 演示(PPT) | `ppt-master` | PDF/DOCX/URL/Markdown→原生可编辑 PPTX（DrawingML 形状/图表/动画，11k+ 图标库） | vendored ᵛ |
 | 环境自举 | `env-setup` | 查 Python → 建项目根 `.venv` → 装依赖 | 本项目保留 |
 
 > ᵛ = 直接引入的现成开源技能（vendored），来源与许可见 [THIRD_PARTY_SKILLS.md](THIRD_PARTY_SKILLS.md)。
