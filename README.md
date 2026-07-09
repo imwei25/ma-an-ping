@@ -56,6 +56,25 @@ bash install.sh --with-pdf --link-claude
 
 Docker 部署走 `deploy/requirements.txt` + `deploy/Dockerfile`（容器内技能落 `/app/.opencode/skills/`，`deploy/AGENTS.md` 作为 OpenCode 的项目说明）。
 
+### 启动 Web 网关
+
+装好后用根目录一键启动脚本（会刷新 PATH 找到 pandoc/xelatex/node/opencode、激活项目 `.venv` 让技能的 `python3` 指向它、缺 `web/node_modules` 自动 `npm install`，再起网关；网关自身会拉起本机 opencode 重扫技能目录）：
+
+```powershell
+# Windows：网关 3100 + opencode 4198（默认，避开母项目 3000/4098）
+powershell -ExecutionPolicy Bypass -File start.ps1
+powershell -ExecutionPolicy Bypass -File start.ps1 -Port 3100 -OcPort 4198
+powershell -ExecutionPolicy Bypass -File start.ps1 -NoAuth      # 关掉局域网登录（localhost 始终免登录）
+```
+```bash
+# Linux / macOS
+bash start.sh
+PORT=3100 OC_PORT=4198 bash start.sh
+NO_AUTH=1 bash start.sh
+```
+
+启动后浏览器打开 `http://localhost:<Port>`（本机免登录）。停网关按 `Ctrl+C`；opencode 是 detached 进程，另用 `scripts\serve-opencode.ps1 -Force` 或杀对应端口。模型走 opencode 的全局登录（默认 `deepseek/deepseek-v4-pro`），未登录时可用 `opencode auth login` 配置。
+
 > **换机器 / 换框架时**：技能不写死任何机器路径——解释器统一指向**项目根 `.venv`**（Windows `.venv\Scripts\python.exe`，Linux/mac `.venv/bin/python`）。把 `skills/` 拷到目标框架的技能根、跑一次 `env-setup`（或 `scripts/setup.*`）建好 `.venv` 即可，无需改任何 SKILL.md。
 
 ## 依赖与数据源要点
