@@ -5,7 +5,8 @@
       "name": "web",
       "runtimeExecutable": "node",
       "runtimeArgs": ["web/server.mjs"],
-      "port": 3000
+      "port": 3100,
+      "env": { "PORT": "3100", "OC_URL": "http://127.0.0.1:4198" }
     }
   ]
 }
