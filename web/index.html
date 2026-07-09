@@ -304,6 +304,18 @@
   .modal .mb h4 { color:#c4b5fd; margin:.9em 0 .3em; font-size:13px; }
   .modal .mb code { background:#0b1220; border:1px solid var(--line); border-radius:4px; padding:1px 5px; font-family:ui-monospace,monospace; font-size:.9em; }
   .modal .mb ul { padding-left:1.3em; margin:.4em 0; }
+  .fld { display:block; margin:0 0 12px; }
+  .fld > span { display:block; font-size:12px; color:var(--muted); margin-bottom:5px; }
+  .fld > input { width:100%; box-sizing:border-box; background:#0b1220; color:var(--text); border:1px solid var(--line-hi); border-radius:var(--r-sm); padding:9px 11px; font:inherit; font-size:13px; outline:none; }
+  .fld > input:focus { border-color:var(--violet); box-shadow:var(--glow); }
+  .mbtns { display:flex; align-items:center; gap:8px; margin-top:14px; }
+  .mres { margin:6px 0 2px; padding:9px 12px; border-radius:var(--r-sm); font-size:12.5px; line-height:1.6; border:1px solid var(--line-hi); background:#0d1730; color:var(--muted); word-break:break-word; }
+  .mres.ok { color:#6ee7b7; background:rgba(52,211,153,.08); border-color:rgba(52,211,153,.4); }
+  .mres.err { color:#fca5a5; background:rgba(251,113,133,.08); border-color:rgba(251,113,133,.4); }
+  .mres.run { color:#93c5fd; background:rgba(56,189,248,.08); border-color:rgba(56,189,248,.4); }
+  .mres .mlist { margin-top:6px; display:flex; flex-wrap:wrap; gap:5px; }
+  .mres .mpick { font-family:ui-monospace,monospace; font-size:11px; color:#c4b5fd; background:#141d3c; border:1px solid var(--line-hi); border-radius:5px; padding:2px 7px; cursor:pointer; }
+  .mres .mpick:hover { border-color:var(--violet); color:#fff; }
 
   @media (max-width:1280px) {
     main { grid-template-columns:240px 1fr 1fr; }
@@ -330,6 +342,7 @@
   <div class="hstatus" id="hstatus"><span class="dot"></span><span id="hstatusTxt">已连接</span></div>
   <div class="hcenter"></div>
   <div class="hright">
+    <button class="hbtn" id="btnModel" type="button"><span id="icGear"></span>模型</button>
     <button class="hbtn" id="btnCloud" type="button"><span id="icCloud"></span>云端入口</button>
     <button class="hbtn ghost" id="btnHelp" type="button">使用说明</button>
   </div>
@@ -409,6 +422,26 @@
   </div>
 </div>
 
+<div class="modal" id="modelModal">
+  <div class="box">
+    <div class="mh"><span class="t">后台大模型（OpenAI 格式）</span><button class="pv-close" id="modelClose" type="button">关闭</button></div>
+    <div class="mb">
+      <div id="modelCur" class="note" style="margin:0 0 14px"></div>
+      <label class="fld"><span>API URL（Base，通常以 <code>/v1</code> 结尾）</span><input id="mUrl" type="text" placeholder="https://api.openai.com/v1" autocomplete="off" spellcheck="false"></label>
+      <label class="fld"><span>API Key</span><input id="mKey" type="password" placeholder="sk-…（留空=沿用已保存的）" autocomplete="off" spellcheck="false"></label>
+      <label class="fld"><span>模型名</span><input id="mModel" type="text" placeholder="gpt-4o-mini / deepseek-chat / …" autocomplete="off" spellcheck="false"></label>
+      <div id="mResult" class="mres" hidden></div>
+      <div class="mbtns">
+        <button class="hbtn ghost" id="mTest" type="button">测试连接</button>
+        <span style="flex:1"></span>
+        <button class="abtn danger" id="mReset" type="button"><span id="icTrash3"></span>还原默认</button>
+        <button class="hbtn" id="mSave" type="button">保存并切换</button>
+      </div>
+      <div class="note" style="margin-top:12px">「测试连接」直连你的端点校验 Key/模型；「保存并切换」会把它写成 opencode 的自定义 provider 并**重启后台 opencode**（约 10–20s，首次切换需联网装 provider 包）。Key 只存本机 <code>.model-config.json</code>（已 gitignore），不会上传或提交。仅支持 <b>OpenAI 格式</b>（<code>/chat/completions</code>）。</div>
+    </div>
+  </div>
+</div>
+
 <script>
 // ================= 图标 =================
 const ICONS = {
@@ -447,6 +480,7 @@ const ICONS = {
   target:'<circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3"/>',
   pdf:'<path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8Z"/><path d="M14 3v5h5"/><path d="M8 15h1.5a1 1 0 0 0 0-2H8v4"/>',
   slides:'<rect x="3" y="4" width="18" height="13" rx="2"/><path d="M12 17v3"/><path d="M8.5 20h7"/><path d="M7 9h6"/><path d="M7 12h10"/>',
+  gear:'<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1Z"/>',
 }
 function ic(name, cls){ return '<svg class="ic'+(cls?" "+cls:"")+'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">'+(ICONS[name]||"")+"</svg>" }
 const setIc=(id,name)=>{ const el=document.getElementById(id); if(el) el.innerHTML=ic(name) }
@@ -751,7 +785,7 @@ async function openPreview(name){
   try{const txt=await fetch("api/raw?name="+encodeURIComponent(name)+sidQ()).then(r=>r.text());pvBody.innerHTML=renderMarkdown(txt);enhanceCode(pvBody)}catch{pvBody.innerHTML='<div class="note">加载失败</div>'}
 }
 document.getElementById("pvClose").addEventListener("click",closePreview)
-document.addEventListener("keydown",e=>{if(e.key==="Escape"){if(lb.classList.contains("on"))lb.classList.remove("on");else if(preview.classList.contains("on"))closePreview();else if(document.getElementById("helpModal").classList.contains("on"))document.getElementById("helpModal").classList.remove("on")}})
+document.addEventListener("keydown",e=>{if(e.key==="Escape"){if(lb.classList.contains("on"))lb.classList.remove("on");else if(preview.classList.contains("on"))closePreview();else if(document.getElementById("modelModal").classList.contains("on"))document.getElementById("modelModal").classList.remove("on");else if(document.getElementById("helpModal").classList.contains("on"))document.getElementById("helpModal").classList.remove("on")}})
 
 // ================= 会话 / 历史 =================
 const sessionsEl=document.getElementById("sessions")
@@ -984,6 +1018,59 @@ document.getElementById("btnCloud").addEventListener("click",()=>{
   setExec("run","云端入口：当前为本地部署实例，暂未配置云端地址。")
   setTimeout(()=>{ if(!document.body.classList.contains("streaming")) execLine.hidden = !latestAnswerText() && !currentModule },10)
 })
+
+// ================= 后台大模型设置（OpenAI 格式）=================
+setIc("icGear","gear"); document.getElementById("icTrash3").innerHTML=ic("trash")
+const modelModal=document.getElementById("modelModal")
+const mUrl=document.getElementById("mUrl"), mKey=document.getElementById("mKey"), mModel=document.getElementById("mModel")
+const mResult=document.getElementById("mResult"), modelCur=document.getElementById("modelCur")
+function setMRes(state,msg,models){
+  mResult.hidden=false; mResult.className="mres "+(state||""); mResult.textContent=msg||""
+  if(models&&models.length){
+    const wrap=document.createElement("div"); wrap.className="mlist"
+    models.forEach(id=>{ const s=document.createElement("span"); s.className="mpick"; s.textContent=id; s.title="用这个模型名"; s.addEventListener("click",()=>{ mModel.value=id }); wrap.appendChild(s) })
+    mResult.appendChild(wrap)
+  }
+}
+async function loadModel(){
+  try{
+    const m=await fetch("api/model").then(r=>r.json())
+    const name=m.isCustom ? (m.modelID+" @ 自定义端点") : (m.providerID+"/"+m.modelID+"（默认）")
+    modelCur.innerHTML="当前后台模型：<b style='color:#c4b5fd'>"+name+"</b>"
+    const st=document.getElementById("hstatusTxt"); if(st) st.textContent="已连接 · "+m.modelID
+    if(m.isCustom){ if(!mUrl.value) mUrl.value=m.baseURL||""; if(!mModel.value) mModel.value=m.modelID||"" }
+  }catch{ modelCur.textContent="（无法获取当前模型）" }
+}
+document.getElementById("btnModel").addEventListener("click",()=>{ mResult.hidden=true; loadModel(); modelModal.classList.add("on"); mUrl.focus() })
+document.getElementById("modelClose").addEventListener("click",()=>modelModal.classList.remove("on"))
+modelModal.addEventListener("click",e=>{ if(e.target===modelModal) modelModal.classList.remove("on") })
+document.getElementById("mTest").addEventListener("click",async (e)=>{
+  const body={ baseURL:mUrl.value.trim(), apiKey:mKey.value.trim(), model:mModel.value.trim() }
+  if(!body.baseURL||!body.apiKey){ setMRes("err","请先填 API URL 和 API Key"); return }
+  const b=e.currentTarget, old=b.textContent; b.disabled=true; b.textContent="测试中…"; setMRes("run","正在直连端点测试…")
+  try{ const r=await fetch("api/model/test",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(body)}).then(r=>r.json())
+    setMRes(r.ok?"ok":"err", r.message||(r.ok?"OK":"失败"), r.models)
+  }catch(err){ setMRes("err","请求失败："+err) }
+  b.disabled=false; b.textContent=old
+})
+document.getElementById("mSave").addEventListener("click",async (e)=>{
+  const body={ baseURL:mUrl.value.trim(), apiKey:mKey.value.trim(), model:mModel.value.trim() }
+  if(!body.baseURL||!body.model){ setMRes("err","请填 API URL 和 模型名"); return }
+  const b=e.currentTarget, old=b.textContent; b.disabled=true; b.textContent="切换中…"; setMRes("run","正在保存并重启后台 opencode（约 10–20s）…")
+  try{ const r=await fetch("api/model/set",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(body)}).then(r=>r.json())
+    if(r.ok){ setMRes("ok","已切换到 "+r.modelID+"，后台已重启 ✓"); loadModel() } else setMRes("err",r.message||"切换失败")
+  }catch(err){ setMRes("err","请求失败："+err) }
+  b.disabled=false; b.textContent=old
+})
+document.getElementById("mReset").addEventListener("click",async (e)=>{
+  if(!confirm("还原为默认模型（deepseek）？会清掉自定义端点并重启后台 opencode。")) return
+  const b=e.currentTarget; b.disabled=true; setMRes("run","正在还原并重启…")
+  try{ const r=await fetch("api/model/set",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({reset:true})}).then(r=>r.json())
+    if(r.ok){ setMRes("ok","已还原为默认，后台已重启 ✓"); mUrl.value=""; mKey.value=""; mModel.value=""; loadModel() } else setMRes("err",r.message||"失败")
+  }catch(err){ setMRes("err","请求失败："+err) }
+  b.disabled=false
+})
+loadModel()
 </script>
 </body>
 </html>

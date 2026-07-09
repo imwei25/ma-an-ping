@@ -22,8 +22,54 @@ fs.mkdirSync(OUTPUTS, { recursive: true })
 const OC_URL = process.env.OC_URL || "http://127.0.0.1:4098"
 const client = createOpencodeClient({ baseUrl: OC_URL })
 const un = (r) => (r && r.data !== undefined ? r.data : r)
-const [PID, MID] = (process.env.OC_MODEL || "deepseek/deepseek-v4-pro").split("/")
-const MODEL = { providerID: PID, modelID: MID }
+// ---- 后台大模型：默认 deepseek（key 在 opencode auth.json）；也可从前端切到自定义 OpenAI 格式端点 ----
+const DEFAULT_MODEL = process.env.OC_MODEL || "deepseek/deepseek-v4-pro"
+const MODEL_CFG = path.join(ROOT, ".model-config.json")   // 持久化自定义模型（含 key，已 gitignore）
+const OC_JSON = path.join(ROOT, "opencode.json")          // 自定义 provider 写这里给 opencode 读（gitignore）
+const CUSTOM_PID = "custom"
+let customModel = null                                     // { baseURL, apiKey, model } | null
+let MODEL = (() => { const [p, m] = DEFAULT_MODEL.split("/"); return { providerID: p, modelID: m } })()
+function writeOpencodeJson(c) {
+  const cfg = { "$schema": "https://opencode.ai/config.json", provider: { [CUSTOM_PID]: {
+    npm: "@ai-sdk/openai-compatible", name: "Custom (OpenAI-compatible)",
+    options: { baseURL: c.baseURL, apiKey: c.apiKey },
+    models: { [c.model]: { name: c.model } },
+  } } }
+  fs.writeFileSync(OC_JSON, JSON.stringify(cfg, null, 2))
+}
+function applyCustomModel(c) {   // 写 provider 配置 + 更新运行时 MODEL + 持久化
+  customModel = { baseURL: String(c.baseURL).replace(/\/+$/, ""), apiKey: c.apiKey, model: c.model }
+  writeOpencodeJson(customModel)
+  fs.writeFileSync(MODEL_CFG, JSON.stringify(customModel, null, 2))
+  MODEL = { providerID: CUSTOM_PID, modelID: c.model }
+}
+function resetModel() {          // 还原默认（deepseek）
+  customModel = null
+  try { if (fs.existsSync(OC_JSON)) fs.unlinkSync(OC_JSON) } catch {}
+  try { if (fs.existsSync(MODEL_CFG)) fs.unlinkSync(MODEL_CFG) } catch {}
+  const [p, m] = DEFAULT_MODEL.split("/"); MODEL = { providerID: p, modelID: m }
+}
+try { if (fs.existsSync(MODEL_CFG)) { const c = JSON.parse(fs.readFileSync(MODEL_CFG, "utf8")); if (c && c.baseURL && c.model) applyCustomModel(c) } } catch {}
+// OpenAI 格式连通性 / key 测试（直连端点，不经 opencode）
+async function testOpenAI({ baseURL, apiKey, model }) {
+  const base = String(baseURL || "").replace(/\/+$/, "")
+  if (!base) return { ok: false, message: "缺少 API URL" }
+  if (!apiKey) return { ok: false, message: "缺少 API Key" }
+  const headers = { "Content-Type": "application/json", Authorization: "Bearer " + apiKey }
+  try {
+    const r = await fetch(base + "/chat/completions", { method: "POST", headers,
+      body: JSON.stringify({ model: model || "gpt-3.5-turbo", messages: [{ role: "user", content: "ping" }], max_tokens: 1 }) })
+    if (r.ok) return { ok: true, message: "连接成功，模型可用 ✓" }
+    let msg = "HTTP " + r.status; const txt = await r.text().catch(() => "")
+    try { const j = JSON.parse(txt); msg = (j.error && j.error.message) || msg } catch {}
+    if (r.status === 404 || /model|not found|does not exist|no such/i.test(msg)) {   // key 可能有效、只是模型名不对 → 列可选模型
+      const rm = await fetch(base + "/models", { headers }).catch(() => null)
+      if (rm && rm.ok) { const jm = await rm.json().catch(() => null); const ids = ((jm && jm.data) || []).map(x => x.id).filter(Boolean).slice(0, 60)
+        return { ok: false, message: "Key 有效，但模型名可能不对：" + msg, models: ids } }
+    }
+    return { ok: false, message: msg }
+  } catch (e) { return { ok: false, message: "请求失败：" + String((e && e.message) || e) } }
+}
 const PORT = Number(process.env.PORT || 3000)
 // ---- 每个会话独占 uploads/<sid>/ 和 outputs/<sid>/（多用户隔离）----
 const safeSid = (s) => (s || "").replace(/[^a-zA-Z0-9_-]/g, "")   // 防目录穿越
@@ -281,6 +327,35 @@ const server = http.createServer(async (req, res) => {
       sse("done", {})
       done = true; res.end()
       return
+    }
+
+    // ---- 后台大模型：查看 / 测试 / 切换（仅 OpenAI 格式）----
+    if (req.method === "GET" && u.pathname === "/api/model") {
+      return send(res, 200, "application/json", JSON.stringify({
+        isCustom: MODEL.providerID === CUSTOM_PID,
+        providerID: MODEL.providerID, modelID: MODEL.modelID,
+        baseURL: customModel ? customModel.baseURL : "", hasKey: !!(customModel && customModel.apiKey),
+        default: DEFAULT_MODEL,
+      }))
+    }
+    if (req.method === "POST" && u.pathname === "/api/model/test") {
+      const chunks = []; for await (const c of req) chunks.push(c)
+      let b = {}; try { b = JSON.parse(Buffer.concat(chunks).toString() || "{}") } catch {}
+      const out = await testOpenAI({ baseURL: b.baseURL, apiKey: b.apiKey, model: b.model })
+      return send(res, 200, "application/json", JSON.stringify(out))
+    }
+    if (req.method === "POST" && u.pathname === "/api/model/set") {
+      const chunks = []; for await (const c of req) chunks.push(c)
+      let b = {}; try { b = JSON.parse(Buffer.concat(chunks).toString() || "{}") } catch {}
+      if (b.reset) { resetModel() }
+      else {
+        if (!b.baseURL || !b.model) return send(res, 400, "application/json", JSON.stringify({ ok: false, message: "缺少 API URL 或 模型名" }))
+        const apiKey = b.apiKey || (customModel && customModel.apiKey) || ""   // 只改 url/model 时复用已存 key
+        if (!apiKey) return send(res, 400, "application/json", JSON.stringify({ ok: false, message: "缺少 API Key" }))
+        applyCustomModel({ baseURL: b.baseURL, apiKey, model: b.model })
+      }
+      try { await ensureOpencode() } catch {}   // 重启本机 opencode 让它重载 provider 配置
+      return send(res, 200, "application/json", JSON.stringify({ ok: true, isCustom: MODEL.providerID === CUSTOM_PID, providerID: MODEL.providerID, modelID: MODEL.modelID }))
     }
 
     send(res, 404, "text/plain", "not found")
