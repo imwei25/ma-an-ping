@@ -10,7 +10,7 @@
 - **深度研究**：`academic-research-suite`（多源检索 + 对抗式核查 + 成文报告）
 - **文献综述**：`survey-builder`（叙述性综述 / 调研报告；占位·通用流程兜底）
 - **基金申请（中文标书）**：`fund-background-writer`、`fund-literature-review-writer`、`fund-research-content-writer`、`fund-technical-route-writer`
-- **文稿核查**：`reference-check`（查假引用 / 核 DOI-PMID）、`humanize-academic`（去 AI 味润色）
+- **文稿核查**：`reference-check`（查假引用 / 核 DOI-PMID）、`humanize-academic`（去 AI 味润色）、`paperconan`（论文源数据完整性核查：扫 .xlsx/.csv/PDF 表格的数值异常信号，PubPeer / 科研诚信准备——只报信号不下结论）
 - **排版出件**：`render-pdf-doc`（Markdown→出版级 PDF，pandoc+xelatex，含中文排版）、`render-docx`（Markdown→投稿版 `.docx`）
 - **基础设施**：`env-setup`（建项目根 `.venv`、装依赖）
 

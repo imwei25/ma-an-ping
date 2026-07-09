@@ -18,6 +18,7 @@
 | `fund-research-content-writer` | [HuiyuLi-2000/Chinese-Grant-Writer-Skills](https://github.com/HuiyuLi-2000/Chinese-Grant-Writer-Skills) | `skills/fund-research-content-writer` | 见上游 LICENSE |
 | `fund-technical-route-writer` | [HuiyuLi-2000/Chinese-Grant-Writer-Skills](https://github.com/HuiyuLi-2000/Chinese-Grant-Writer-Skills) | `skills/fund-technical-route-writer` | 见上游 LICENSE |
 | `render-pdf-doc` | [Aperivue/medsci-skills](https://github.com/Aperivue/medsci-skills) | `skills/render-pdf-doc`（Markdown→PDF，pandoc+xelatex） | MIT |
+| `paperconan` | [zixixr/paperconan](https://github.com/zixixr/paperconan) | `skills/paperconan`（论文源数据完整性核查，包 `paperconan` CLI） | 见上游 LICENSE |
 
 ## 本仓库自建 / 保留的技能（非 vendored）
 - `reference-check`（查假引用 / 核 DOI-PMID）、`humanize-academic`（去 AI 味）、`render-docx`（Markdown→投稿版 `.docx`，走 pandoc）、`env-setup`（环境自举）：来自本套件母项目，随本项目保留。
@@ -29,6 +30,7 @@
 3. `nature-figure`：沿用母项目引入版（已删除 ~30MB 示例图库 `assets/`，保留 SKILL.md / manifest / static / references / scripts / evals）。
 4. `academic-research-suite`：删除了内部 `.github/` 等无关目录。
 5. `render-pdf-doc`：删除了 `tests/` 测试夹具，保留 SKILL.md / scripts / references / templates。
+6. `paperconan`：仅取上游的 `skills/paperconan/`（SKILL.md + references，未带 `src/` 源码）；顶部加「本仓库运行环境」块，说明 `paperconan` CLI 已装进 `.venv`、跳过原文第 0 步的安装/询问。CLI 由 `pip install "paperconan[all]"` 提供（见 requirements）。
 
 ## 未采用
 - **LaTeX Writer**（[EvolvingLMMs-Lab/lmms-lab-writer](https://github.com/EvolvingLMMs-Lab/lmms-lab-writer)）：上游是一个完整的前端应用（apps/desktop·web·video 单仓库），**不是 skill 包**，无法按本套件的 `SKILL.md` 约定装入，故未采用。
@@ -41,6 +43,7 @@
 - `fund-literature-review-writer`：`scholarly`（Google Scholar，易被限流）/ `exa-py`（需 `EXA_API_KEY`），均可选。
 - `academic-research-suite` / nature 文字类技能：无 pip 依赖。
 - `render-pdf-doc` / `render-docx`：脚本走标准库，靠**系统 pandoc**（`render-pdf-doc` 另需 **xelatex** + CJK 字体）出件，由 `-WithPdf` / `--with-pdf` 安装。
+- `paperconan`：`paperconan[all]`（含 `python-calamine` 读 .xls/.xlsx、`pdfplumber`/`python-docx` 解析 PDF/Word 表格），提供 `paperconan` 命令行；已并入 `requirements-skills.txt`。
 
 ## 保留声明
 各上游仓库的版权与许可声明随技能目录保留；本文件即为对本仓库改动的说明。使用前请核对各上游仓库的 LICENSE 原文。

@@ -45,6 +45,9 @@ pymupdf4llm        # PDF → Markdown（喂给 LLM 分析）
 pypdf              # 读取 / 拆分 PDF
 pdfplumber         # 从 PDF 抽取文字 / 表格
 
+# ---- paperconan（论文源数据完整性核查）：提供 `paperconan` CLI ----
+paperconan[all]    # 数值异常信号扫描 + pdf/docx 表格解析；依赖 python-calamine（读 .xls/.xlsx）
+
 # ---- fund-literature-review-writer（基金综述检索）：需自备 key / 可能被墙，可选 ----
 scholarly          # Google Scholar 抓取（无需 key，但易被限流）
 exa-py             # Exa 检索（需 EXA_API_KEY）

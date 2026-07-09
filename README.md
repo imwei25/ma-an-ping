@@ -11,7 +11,7 @@
 - 上传目录 `uploads/`，产出目录 `outputs/`。
 - 项目根 `AGENTS.md`（OpenCode）/ `CLAUDE.md`（Claude Code）只是**项目说明 + 几条通用硬规矩**，不是调度器。
 
-## 技能套件（18 个）
+## 技能套件（19 个）
 
 | 方向 | 技能 | 说明 | 来源 |
 |---|---|---|---|
@@ -30,6 +30,7 @@
 | 基金·技术路线 | `fund-technical-route-writer` | 技术路线 / 可行性 | vendored ᵛ |
 | 文献真实性核查 | `reference-check` | 对 Crossref/Europe PMC 查假引用（不存在/张冠李戴/虚构） | 本项目保留 |
 | 去 AI 味 | `humanize-academic` | 去机器腔（中英双语清单），保术语与引用 + 不变量校验 | 本项目保留 |
+| 数据核查 | `paperconan` | 论文源数据表数值异常信号扫描（.xlsx/.csv/PDF），科研诚信 / PubPeer 准备（只报信号不下结论） | vendored ᵛ |
 | 排版(PDF) | `render-pdf-doc` | Markdown→出版级 PDF（pandoc+xelatex，含中文排版） | vendored ᵛ |
 | 排版(Word) | `render-docx` | Markdown→投稿版 `.docx`（多数医学期刊要 Word） | 本项目保留 |
 | 环境自举 | `env-setup` | 查 Python → 建项目根 `.venv` → 装依赖 | 本项目保留 |
