@@ -19,11 +19,11 @@
 
 ```powershell
 # Windows
-powershell -ExecutionPolicy Bypass -File install.ps1      # 或 scripts\setup.ps1
+powershell -ExecutionPolicy Bypass -File install.ps1
 ```
 ```bash
 # Linux / macOS
-bash install.sh                                           # 或 scripts/setup.sh
+bash install.sh
 ```
 
 脚本做的事：建/复用项目根 `.venv` → 装/更新依赖（`scripts/requirements-skills.txt`）→ 跑 `scripts/validate_skills.py` 校验（无 BOM、frontmatter 合法、两套镜像技能集合一致、正文无漂移）。**不再写任何路由文件**。Claude Code 用户可加 `-LinkClaude` / `--link-claude` 把技能复制到 `~/.claude/skills/`。

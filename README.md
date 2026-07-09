@@ -73,12 +73,12 @@ bash start.sh
 
 ```powershell
 # Windows 本地
-powershell -ExecutionPolicy Bypass -File install.ps1           # 或 scripts\setup.ps1
+powershell -ExecutionPolicy Bypass -File install.ps1
 powershell -ExecutionPolicy Bypass -File install.ps1 -WithPdf -LinkClaude
 ```
 ```bash
 # Linux 服务器（非 Docker）
-bash install.sh                # 或 scripts/setup.sh；之后 source .venv/bin/activate 再起服务
+bash install.sh                # 之后可 source .venv/bin/activate
 bash install.sh --with-pdf --link-claude
 ```
 
