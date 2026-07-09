@@ -1,5 +1,0 @@
-[oc] 重启本机 opencode :4198（让它重扫 .opencode/skills/）...
-[oc] 就绪：http://127.0.0.1:4198（工作目录=D:\projects\scientific-writer）
-gateway on http://localhost:3100  (opencode=http://127.0.0.1:4198, model=deepseek/deepseek-v4-pro)
-  局域网访问：http://10.1.26.65:3100
-  局域网登录：账号 tellgen / 密码 123（本机 localhost 免登录；改账号密码用环境变量 LAN_USER/LAN_PASSWORD，关登录用 LAN_AUTH=0）

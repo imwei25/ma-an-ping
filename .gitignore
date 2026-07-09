@@ -24,3 +24,7 @@ deploy/htpasswd
 .env
 serve.out
 serve.err
+
+# 运行时网关日志
+gateway.*.out
+gateway.*.err
