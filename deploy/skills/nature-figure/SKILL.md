@@ -6,6 +6,10 @@ version: 2.1.0
 author: Community contribution (nature-skills); repo-adapted backend/default policy
 ---
 
+> **【本平台交互约定 · 覆盖下文任何“弹选项卡 / 结构化提问 / AskUserQuestion”的说法】**
+> 需要用户在多个方向间拍板时，**禁止**调用 `AskUserQuestion`、也**不要**输出前端会渲染成选项卡的 `ask` JSON 代码块或任何弹窗式多选控件。一律改为在**正文用纯文本编号候选**：列 2–4 个具体、互斥的选项，每个一句话点明差异与代价；**把推荐项放第 1 个并写明“推荐 1，因为……”**；结尾明确告诉用户**直接回一个数字（如 1 / 2 / 3）即可推进**。用户只回数字＝选定该项、直接进入下一步、不再追问确认；回了别的（文字 / 否定 / 多选）按其本意走。仅当信息根本无法枚举（纯事实补录，如伦理批号、注册号、代表作清单）时才用开放式提问。
+
+
 > **本仓库运行环境（先读）**：Python 用 `.venv/Scripts/python.exe`（Windows）/ `.venv/bin/python`（Linux/macOS）（项目根 `.venv`；没有先跑 `env-setup` 技能）；本技能脚本在 `.opencode/skills/nature-figure/` 下，运行时先 `cd` 到该目录或用全路径；产出写 `outputs/`（有会话专属目录时以它为准、勿写仓库根固定名）。
 >
 > **本仓库后端策略（覆盖下方 vendored 正文的"必须问一次 Python or R"）**：默认直接用 **Python 后端**（matplotlib/seaborn 已装，R 后端未装）。**不要**为了选后端而停下来问用户——除非用户在请求里明确说要 R。因此下方 "Resolve the backend — a blocking gate" 一节在本仓库简化为：无明确 R 要求 → 直接 Python，跳过提问。默认不使用 OpenRouter 图像路线（需自备 key）。以下为上游技能原文（vendored，方法论未改）。
