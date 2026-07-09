@@ -1024,6 +1024,13 @@ setIc("icGear","gear"); document.getElementById("icTrash3").innerHTML=ic("trash"
 const modelModal=document.getElementById("modelModal")
 const mUrl=document.getElementById("mUrl"), mKey=document.getElementById("mKey"), mModel=document.getElementById("mModel")
 const mResult=document.getElementById("mResult"), modelCur=document.getElementById("modelCur")
+// 稳健取 JSON：接口返回非 JSON（如旧网关的 404 "not found"）时给出可读提示，而不是抛 SyntaxError
+async function apiJSON(url,opts){
+  let r; try{ r=await fetch(url,opts) }catch(e){ return {ok:false,message:"网络错误："+(e&&e.message||e)} }
+  const txt=await r.text().catch(()=>"")
+  try{ return JSON.parse(txt) }
+  catch{ return {ok:false,message: r.status===404 ? "接口不存在——正在跑的后台网关是旧版本，请重启网关（start.ps1 / start.sh）后重试" : ("非预期响应（HTTP "+r.status+"）："+txt.slice(0,120))} }
+}
 function setMRes(state,msg,models){
   mResult.hidden=false; mResult.className="mres "+(state||""); mResult.textContent=msg||""
   if(models&&models.length){
@@ -1034,7 +1041,8 @@ function setMRes(state,msg,models){
 }
 async function loadModel(){
   try{
-    const m=await fetch("api/model").then(r=>r.json())
+    const m=await apiJSON("api/model")
+    if(!m||!m.modelID){ modelCur.textContent="（无法获取当前模型）"; return }
     const name=m.isCustom ? (m.modelID+" @ 自定义端点") : (m.providerID+"/"+m.modelID+"（默认）")
     modelCur.innerHTML="当前后台模型：<b style='color:#c4b5fd'>"+name+"</b>"
     const st=document.getElementById("hstatusTxt"); if(st) st.textContent="已连接 · "+m.modelID
@@ -1048,7 +1056,7 @@ document.getElementById("mTest").addEventListener("click",async (e)=>{
   const body={ baseURL:mUrl.value.trim(), apiKey:mKey.value.trim(), model:mModel.value.trim() }
   if(!body.baseURL||!body.apiKey){ setMRes("err","请先填 API URL 和 API Key"); return }
   const b=e.currentTarget, old=b.textContent; b.disabled=true; b.textContent="测试中…"; setMRes("run","正在直连端点测试…")
-  try{ const r=await fetch("api/model/test",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(body)}).then(r=>r.json())
+  try{ const r=await apiJSON("api/model/test",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(body)})
     setMRes(r.ok?"ok":"err", r.message||(r.ok?"OK":"失败"), r.models)
   }catch(err){ setMRes("err","请求失败："+err) }
   b.disabled=false; b.textContent=old
@@ -1057,7 +1065,7 @@ document.getElementById("mSave").addEventListener("click",async (e)=>{
   const body={ baseURL:mUrl.value.trim(), apiKey:mKey.value.trim(), model:mModel.value.trim() }
   if(!body.baseURL||!body.model){ setMRes("err","请填 API URL 和 模型名"); return }
   const b=e.currentTarget, old=b.textContent; b.disabled=true; b.textContent="切换中…"; setMRes("run","正在保存并重启后台 opencode（约 10–20s）…")
-  try{ const r=await fetch("api/model/set",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(body)}).then(r=>r.json())
+  try{ const r=await apiJSON("api/model/set",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(body)})
     if(r.ok){ setMRes("ok","已切换到 "+r.modelID+"，后台已重启 ✓"); loadModel() } else setMRes("err",r.message||"切换失败")
   }catch(err){ setMRes("err","请求失败："+err) }
   b.disabled=false; b.textContent=old
@@ -1065,7 +1073,7 @@ document.getElementById("mSave").addEventListener("click",async (e)=>{
 document.getElementById("mReset").addEventListener("click",async (e)=>{
   if(!confirm("还原为默认模型（deepseek）？会清掉自定义端点并重启后台 opencode。")) return
   const b=e.currentTarget; b.disabled=true; setMRes("run","正在还原并重启…")
-  try{ const r=await fetch("api/model/set",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({reset:true})}).then(r=>r.json())
+  try{ const r=await apiJSON("api/model/set",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({reset:true})})
     if(r.ok){ setMRes("ok","已还原为默认，后台已重启 ✓"); mUrl.value=""; mKey.value=""; mModel.value=""; loadModel() } else setMRes("err",r.message||"失败")
   }catch(err){ setMRes("err","请求失败："+err) }
   b.disabled=false
