@@ -1,0 +1,167 @@
+<!doctype html>
+<html lang="zh">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>登录 · Niuma Science</title>
+<style>
+  :root {
+    --text: #e6edf6; --muted: #93a3ba; --faint: #7a8ca6;
+    --cyan: #38bdf8; --accent: #22b8f0; --accent-deep: #2563eb;
+    --line: #24344f; --line-hi: #33466a; --card: #0e1829;
+    --rose: #fb7185;
+  }
+  * { box-sizing: border-box; }
+  html, body { height: 100%; margin: 0; }
+  body {
+    color: var(--text); overflow: hidden;
+    font-family: system-ui, -apple-system, "Segoe UI", "Microsoft YaHei", sans-serif;
+    background: linear-gradient(180deg, #0a1120, #0b1322);
+    display: grid; place-items: center;
+  }
+  /* 背景霓虹光斑，缓慢漂浮 */
+  .bg { position: fixed; inset: 0; overflow: hidden; z-index: 0; }
+  .blob { position: absolute; border-radius: 50%; filter: blur(80px); opacity: .5; }
+  .b1 { width: 460px; height: 460px; background: #1d4ed8; top: -140px; left: -100px; animation: float1 16s ease-in-out infinite; }
+  .b2 { width: 520px; height: 520px; background: #0891b2; bottom: -180px; right: -120px; animation: float2 19s ease-in-out infinite; }
+  .b3 { width: 360px; height: 360px; background: #7c3aed; top: 40%; left: 55%; opacity: .35; animation: float1 22s ease-in-out infinite reverse; }
+  @keyframes float1 { 0%,100% { transform: translate(0,0) scale(1); } 50% { transform: translate(40px,50px) scale(1.08); } }
+  @keyframes float2 { 0%,100% { transform: translate(0,0) scale(1); } 50% { transform: translate(-50px,-40px) scale(1.1); } }
+  /* 细网格叠加 */
+  .grid { position: fixed; inset: 0; z-index: 0; opacity: .35;
+    background-image: linear-gradient(rgba(56,189,248,.06) 1px, transparent 1px), linear-gradient(90deg, rgba(56,189,248,.06) 1px, transparent 1px);
+    background-size: 44px 44px; mask-image: radial-gradient(circle at 50% 42%, #000 30%, transparent 78%); }
+
+  .card {
+    position: relative; z-index: 1; width: 360px; max-width: calc(100vw - 40px);
+    padding: 34px 30px 30px; border-radius: 20px;
+    background: linear-gradient(180deg, rgba(20,32,54,.72), rgba(13,21,37,.68));
+    border: 1px solid rgba(56,189,248,.18);
+    box-shadow: 0 24px 70px rgba(0,0,0,.55), inset 0 1px 0 rgba(255,255,255,.06);
+    backdrop-filter: blur(14px);
+    animation: rise .5s cubic-bezier(.2,.8,.2,1);
+  }
+  @keyframes rise { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: none; } }
+  .logo {
+    width: 54px; height: 54px; margin: 0 auto 16px; display: grid; place-items: center; color: #eaf6ff;
+    border-radius: 15px; background: linear-gradient(140deg, #1d4ed8, #0891b2);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.2), 0 10px 26px rgba(8,145,178,.42);
+  }
+  .logo svg { width: 30px; height: 30px; stroke: currentColor; stroke-width: 1.8; fill: none; }
+  h1 { margin: 0; text-align: center; font-size: 19px; font-weight: 700; letter-spacing: .3px; }
+  .sub { margin: 6px 0 24px; text-align: center; color: var(--faint); font-size: 12.5px; }
+
+  .field { position: relative; margin-bottom: 14px; }
+  .field svg.lead { position: absolute; left: 13px; top: 50%; transform: translateY(-50%); width: 17px; height: 17px; stroke: var(--faint); stroke-width: 1.8; fill: none; pointer-events: none; }
+  input {
+    width: 100%; height: 46px; padding: 0 44px 0 40px; color: var(--text); font-size: 14px;
+    background: rgba(9,15,28,.72); border: 1px solid var(--line-hi); border-radius: 12px; outline: none;
+    transition: border-color .16s, box-shadow .16s;
+  }
+  input::placeholder { color: #5f7290; }
+  input:focus { border-color: var(--cyan); box-shadow: 0 0 0 3px rgba(56,189,248,.16); }
+  .toggle { position: absolute; right: 8px; top: 50%; transform: translateY(-50%); width: 32px; height: 32px; display: grid; place-items: center; background: none; border: 0; color: var(--faint); cursor: pointer; border-radius: 8px; }
+  .toggle:hover { color: var(--cyan); }
+  .toggle svg { width: 17px; height: 17px; stroke: currentColor; stroke-width: 1.8; fill: none; }
+
+  button.submit {
+    width: 100%; height: 46px; margin-top: 6px; border: 0; border-radius: 12px; cursor: pointer;
+    color: #05121f; font-size: 14.5px; font-weight: 700; letter-spacing: .4px;
+    background: linear-gradient(135deg, #38bdf8, #2563eb); background-size: 180% 180%;
+    box-shadow: 0 10px 26px rgba(37,99,235,.4);
+    transition: transform .12s, box-shadow .16s, filter .16s; animation: shimmer 5s ease infinite;
+  }
+  @keyframes shimmer { 0%,100% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } }
+  button.submit:hover { filter: brightness(1.06); box-shadow: 0 14px 32px rgba(37,99,235,.5); }
+  button.submit:active { transform: translateY(1px) scale(.99); }
+  button.submit:disabled { filter: grayscale(.4) brightness(.8); cursor: default; animation: none; }
+
+  .err { min-height: 18px; margin: 12px 2px 0; text-align: center; color: var(--rose); font-size: 12.5px; opacity: 0; transition: opacity .16s; }
+  .err.show { opacity: 1; }
+  .card.shake { animation: shake .38s; }
+  @keyframes shake { 10%,90% { transform: translateX(-1px); } 20%,80% { transform: translateX(2px); } 30%,50%,70% { transform: translateX(-5px); } 40%,60% { transform: translateX(5px); } }
+  .foot { margin-top: 20px; text-align: center; color: #556a88; font-size: 11px; }
+  .foot .dot { display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: #34d399; margin-right: 5px; vertical-align: middle; box-shadow: 0 0 8px #34d399; }
+</style>
+</head>
+<body>
+  <div class="bg"><div class="blob b1"></div><div class="blob b2"></div><div class="blob b3"></div></div>
+  <div class="grid"></div>
+
+  <form class="card" id="card" autocomplete="off">
+    <div class="logo">
+      <svg viewBox="0 0 24 24"><path d="M12 2 3 7v6c0 5 3.8 8.3 9 9 5.2-.7 9-4 9-9V7l-9-5Z"/><path d="m9 12 2 2 4-4"/></svg>
+    </div>
+    <h1>Niuma Science</h1>
+    <div class="sub">局域网访问 · 请登录</div>
+
+    <div class="field">
+      <svg class="lead" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>
+      <input id="user" type="text" placeholder="账号" autocomplete="username" autofocus />
+    </div>
+
+    <div class="field">
+      <svg class="lead" viewBox="0 0 24 24"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>
+      <input id="pw" type="password" placeholder="密码" autocomplete="current-password" />
+      <button type="button" class="toggle" id="toggle" aria-label="显示/隐藏密码">
+        <svg id="eye" viewBox="0 0 24 24"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/></svg>
+      </button>
+    </div>
+
+    <button type="submit" class="submit" id="go">进 入</button>
+    <div class="err" id="err"></div>
+    <div class="foot"><span class="dot"></span>透景生命 · 科研 Agent 演示</div>
+  </form>
+
+<script>
+  const card = document.getElementById('card');
+  const user = document.getElementById('user');
+  const pw = document.getElementById('pw');
+  const err = document.getElementById('err');
+  const go = document.getElementById('go');
+  const toggle = document.getElementById('toggle');
+  const eye = document.getElementById('eye');
+
+  toggle.onclick = () => {
+    const show = pw.type === 'password';
+    pw.type = show ? 'text' : 'password';
+    eye.innerHTML = show
+      ? '<path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/><path d="M3 3l18 18"/>'
+      : '<path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/>';
+    pw.focus();
+  };
+
+  function fail(msg) {
+    err.textContent = msg; err.classList.add('show');
+    card.classList.remove('shake'); void card.offsetWidth; card.classList.add('shake');
+    pw.select();
+  }
+
+  card.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const username = user.value.trim();
+    const password = pw.value.trim();
+    if (!username) return fail('请输入账号');
+    if (!password) return fail('请输入密码');
+    go.disabled = true; go.textContent = '验证中…'; err.classList.remove('show');
+    try {
+      const r = await fetch('/api/login', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username, password })
+      });
+      if (r.ok) {
+        go.textContent = '欢迎 ✓';
+        const next = new URLSearchParams(location.search).get('next') || '/';
+        location.href = next;
+        return;
+      }
+      const d = await r.json().catch(() => ({}));
+      fail(d.err || '密码错误');
+    } catch (_) {
+      fail('网络异常，请重试');
+    }
+    go.disabled = false; go.textContent = '进 入';
+  });
+</script>
+</body>
+</html>

@@ -1,0 +1,53 @@
+# 科研写作 Skill 套件 —— 统一装进项目根虚拟环境 .venv
+# 由 install.ps1 / install.sh（或 scripts/setup.ps1 / setup.sh）安装。
+# 覆盖：nature-figure、paper-writer、paper-spine、reference-check、fund-* 等技能的依赖。
+# 说明：paper-spine 的脚本全走标准库；nature 文字类技能与 academic-research-suite 无 pip 依赖。
+
+# ---- 核心科学计算（nature-figure / paper-writer / 通用作图） ----
+pandas
+numpy
+scipy
+matplotlib
+scikit-learn
+seaborn
+statsmodels
+openpyxl
+
+# ---- 文献检索 / 下载（literature-download, literature-review, research-scan）----
+requests
+httpx
+metapub            # NCBI/PubMed 元数据 + FindIt 找可下载 PDF
+pymed              # PubMed 简洁封装
+biopython          # import 名为 Bio；Entrez eutils
+habanero           # Crossref REST 客户端
+pyalex             # OpenAlex 客户端
+bibtexparser       # 读写 .bib
+rispy              # 读写 RIS（EndNote/Zotero 通用格式）
+
+# ---- 文档排版（journal-formatting, grant-proposal）----
+python-docx        # 生成 .docx
+reportlab          # 生成 .pdf
+lxml               # docx/xml 处理
+
+# ---- 抓取解析（deep-research, research-scan）----
+beautifulsoup4
+tqdm
+
+# ---- 医学作图（nature-figure 用 matplotlib/seaborn；以下为通用增强）----
+lifelines          # Kaplan-Meier 生存曲线 / Cox（data-analysis 也用）
+adjustText         # 标签自动避让
+
+# ---- 全文下载 / PDF 转换（paper-qa / 通用 PDF 处理）----
+pymupdf            # 读/校验 PDF
+pymupdf4llm        # PDF → Markdown（喂给 LLM 分析）
+
+# ---- paper-writer 新增（IMRaD 全流程、表格 / 森林图、PDF 解析）----
+pypdf              # 读取 / 拆分 PDF
+pdfplumber         # 从 PDF 抽取文字 / 表格
+
+# ---- fund-literature-review-writer（基金综述检索）：需自备 key / 可能被墙，可选 ----
+scholarly          # Google Scholar 抓取（无需 key，但易被限流）
+exa-py             # Exa 检索（需 EXA_API_KEY）
+
+# ---- paper-qa（私有知识库 RAG，占位技能）：默认不装，用时再 pip install "paper-qa>=5" ----
+# paper-qa>=5      # 取消注释即启用；需 OPENAI_API_KEY 或 LiteLLM 配置（见 skills/paper-qa/SKILL.md）
