@@ -308,6 +308,10 @@
   .fld > span { display:block; font-size:12px; color:var(--muted); margin-bottom:5px; }
   .fld > input { width:100%; box-sizing:border-box; background:#0b1220; color:var(--text); border:1px solid var(--line-hi); border-radius:var(--r-sm); padding:9px 11px; font:inherit; font-size:13px; outline:none; }
   .fld > input:focus { border-color:var(--violet); box-shadow:var(--glow); }
+  .mpresets { display:flex; align-items:center; gap:8px; flex-wrap:wrap; margin:0 0 14px; }
+  .mpresets .plabel { font-size:12px; color:var(--muted); }
+  .ppreset { font-size:12px; color:#c9b8ff; background:rgba(139,92,246,.1); border:1px solid rgba(139,92,246,.4); border-radius:999px; padding:5px 12px; cursor:pointer; transition:.15s; }
+  .ppreset:hover { color:#fff; border-color:var(--violet); box-shadow:var(--glow); }
   .mbtns { display:flex; align-items:center; gap:8px; margin-top:14px; }
   .mres { margin:6px 0 2px; padding:9px 12px; border-radius:var(--r-sm); font-size:12.5px; line-height:1.6; border:1px solid var(--line-hi); background:#0d1730; color:var(--muted); word-break:break-word; }
   .mres.ok { color:#6ee7b7; background:rgba(52,211,153,.08); border-color:rgba(52,211,153,.4); }
@@ -426,7 +430,8 @@
   <div class="box">
     <div class="mh"><span class="t">后台大模型（OpenAI 格式）</span><button class="pv-close" id="modelClose" type="button">关闭</button></div>
     <div class="mb">
-      <div id="modelCur" class="note" style="margin:0 0 14px"></div>
+      <div id="modelCur" class="note" style="margin:0 0 12px"></div>
+      <div class="mpresets"><span class="plabel">预设</span><span id="presetRow"></span></div>
       <label class="fld"><span>API URL（Base，通常以 <code>/v1</code> 结尾）</span><input id="mUrl" type="text" placeholder="https://api.openai.com/v1" autocomplete="off" spellcheck="false"></label>
       <label class="fld"><span>API Key</span><input id="mKey" type="password" placeholder="sk-…（留空=沿用已保存的）" autocomplete="off" spellcheck="false"></label>
       <label class="fld"><span>模型名</span><input id="mModel" type="text" placeholder="gpt-4o-mini / deepseek-chat / …" autocomplete="off" spellcheck="false"></label>
@@ -1023,6 +1028,20 @@ document.getElementById("btnCloud").addEventListener("click",()=>{
 setIc("icGear","gear"); document.getElementById("icTrash3").innerHTML=ic("trash")
 const modelModal=document.getElementById("modelModal")
 const mUrl=document.getElementById("mUrl"), mKey=document.getElementById("mKey"), mModel=document.getElementById("mModel")
+// 预设端点：点一下填好 URL + 默认模型名（Key 仍需自己填），省得每次手输
+const MODEL_PRESETS=[
+  { name:"硅基流动", url:"https://api.siliconflow.cn/v1", model:"deepseek-ai/DeepSeek-V3" },
+  { name:"DeepSeek 官方", url:"https://api.deepseek.com/v1", model:"deepseek-chat" },
+  { name:"OpenAI", url:"https://api.openai.com/v1", model:"gpt-4o-mini" },
+]
+;(function renderPresets(){
+  const row=document.getElementById("presetRow")
+  MODEL_PRESETS.forEach(p=>{
+    const b=document.createElement("button"); b.type="button"; b.className="ppreset"; b.textContent=p.name
+    b.title=p.url; b.addEventListener("click",()=>{ mUrl.value=p.url; mModel.value=p.model; mResult.hidden=true; mKey.focus() })
+    row.appendChild(b)
+  })
+})()
 const mResult=document.getElementById("mResult"), modelCur=document.getElementById("modelCur")
 // 稳健取 JSON：接口返回非 JSON（如旧网关的 404 "not found"）时给出可读提示，而不是抛 SyntaxError
 async function apiJSON(url,opts){
