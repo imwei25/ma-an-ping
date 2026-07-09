@@ -9,9 +9,9 @@
 - **论文拆解 / 精读**：`paper-spine`（拆解范文骨架、结构与逻辑迁移）
 - **深度研究**：`academic-research-suite`（多源检索 + 对抗式核查 + 成文报告）
 - **文献综述**：`survey-builder`（叙述性综述 / 调研报告；占位·通用流程兜底）
-- **私有知识库问答**：`paper-qa`（本地 PDF 建库、带引用 RAG；占位·需先配 API key）
 - **基金申请（中文标书）**：`fund-background-writer`、`fund-literature-review-writer`、`fund-research-content-writer`、`fund-technical-route-writer`
 - **文稿核查**：`reference-check`（查假引用 / 核 DOI-PMID）、`humanize-academic`（去 AI 味润色）
+- **排版出件**：`render-pdf-doc`（Markdown→出版级 PDF，pandoc+xelatex，含中文排版）、`render-docx`（Markdown→投稿版 `.docx`）
 - **基础设施**：`env-setup`（建项目根 `.venv`、装依赖）
 
 各技能是否需要串联（例如写完论文再核查引用、综述后再去 AI 味），由你按当下任务临时决定，不存在固定流水线。

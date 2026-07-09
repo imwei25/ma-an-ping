@@ -17,10 +17,10 @@
 | `fund-literature-review-writer` | [HuiyuLi-2000/Chinese-Grant-Writer-Skills](https://github.com/HuiyuLi-2000/Chinese-Grant-Writer-Skills) | `skills/fund-literature-review-writer` | 见上游 LICENSE |
 | `fund-research-content-writer` | [HuiyuLi-2000/Chinese-Grant-Writer-Skills](https://github.com/HuiyuLi-2000/Chinese-Grant-Writer-Skills) | `skills/fund-research-content-writer` | 见上游 LICENSE |
 | `fund-technical-route-writer` | [HuiyuLi-2000/Chinese-Grant-Writer-Skills](https://github.com/HuiyuLi-2000/Chinese-Grant-Writer-Skills) | `skills/fund-technical-route-writer` | 见上游 LICENSE |
+| `render-pdf-doc` | [Aperivue/medsci-skills](https://github.com/Aperivue/medsci-skills) | `skills/render-pdf-doc`（Markdown→PDF，pandoc+xelatex） | MIT |
 
 ## 本仓库自建 / 保留的技能（非 vendored）
-- `reference-check`（查假引用 / 核 DOI-PMID）、`humanize-academic`（去 AI 味）、`env-setup`（环境自举）：来自本套件母项目，随本项目保留。
-- `paper-qa`（私有知识库 RAG，占位）：封装 [Future-House/paper-qa](https://github.com/Future-House/paper-qa)（Apache-2.0，pip 包，非现成 skill）；本仓库仅提供一层调用说明 skill，真正运行需 `pip install "paper-qa>=5"` 并自备 LLM/embedding 的 API key。见 `skills/paper-qa/SKILL.md`。
+- `reference-check`（查假引用 / 核 DOI-PMID）、`humanize-academic`（去 AI 味）、`render-docx`（Markdown→投稿版 `.docx`，走 pandoc）、`env-setup`（环境自举）：来自本套件母项目，随本项目保留。
 - `survey-builder`（文献综述，占位）：目标上游为 [mcpmarket · survey-report-builder](https://mcpmarket.com/zh/tools/skills/survey-report-builder)，抓取受限暂未取得，当前以通用综述流程兜底，待换源补全。
 
 ## 我们做的改动（须按许可声明）
@@ -28,6 +28,7 @@
 2. `paper-writer`：删除了 `tests/` 与 `.github/`。
 3. `nature-figure`：沿用母项目引入版（已删除 ~30MB 示例图库 `assets/`，保留 SKILL.md / manifest / static / references / scripts / evals）。
 4. `academic-research-suite`：删除了内部 `.github/` 等无关目录。
+5. `render-pdf-doc`：删除了 `tests/` 测试夹具，保留 SKILL.md / scripts / references / templates。
 
 ## 未采用
 - **LaTeX Writer**（[EvolvingLMMs-Lab/lmms-lab-writer](https://github.com/EvolvingLMMs-Lab/lmms-lab-writer)）：上游是一个完整的前端应用（apps/desktop·web·video 单仓库），**不是 skill 包**，无法按本套件的 `SKILL.md` 约定装入，故未采用。
@@ -39,7 +40,7 @@
 - `paper-spine`：脚本全走 Python 标准库，无额外 pip 依赖。
 - `fund-literature-review-writer`：`scholarly`（Google Scholar，易被限流）/ `exa-py`（需 `EXA_API_KEY`），均可选。
 - `academic-research-suite` / nature 文字类技能：无 pip 依赖。
-- `paper-qa`：默认不装，用时再 `pip install "paper-qa>=5"`（需 API key）。
+- `render-pdf-doc` / `render-docx`：脚本走标准库，靠**系统 pandoc**（`render-pdf-doc` 另需 **xelatex** + CJK 字体）出件，由 `-WithPdf` / `--with-pdf` 安装。
 
 ## 保留声明
 各上游仓库的版权与许可声明随技能目录保留；本文件即为对本仓库改动的说明。使用前请核对各上游仓库的 LICENSE 原文。

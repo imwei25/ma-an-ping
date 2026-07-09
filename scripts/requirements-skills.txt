@@ -37,7 +37,7 @@ tqdm
 lifelines          # Kaplan-Meier 生存曲线 / Cox（data-analysis 也用）
 adjustText         # 标签自动避让
 
-# ---- 全文下载 / PDF 转换（paper-qa / 通用 PDF 处理）----
+# ---- 通用 PDF 处理 ----
 pymupdf            # 读/校验 PDF
 pymupdf4llm        # PDF → Markdown（喂给 LLM 分析）
 
@@ -49,5 +49,6 @@ pdfplumber         # 从 PDF 抽取文字 / 表格
 scholarly          # Google Scholar 抓取（无需 key，但易被限流）
 exa-py             # Exa 检索（需 EXA_API_KEY）
 
-# ---- paper-qa（私有知识库 RAG，占位技能）：默认不装，用时再 pip install "paper-qa>=5" ----
-# paper-qa>=5      # 取消注释即启用；需 OPENAI_API_KEY 或 LiteLLM 配置（见 skills/paper-qa/SKILL.md）
+# ---- 排版出件（render-pdf-doc / render-docx）----
+# 脚本走标准库；出件靠系统级 pandoc + xelatex（非 pip）。用 install 脚本的 -WithPdf / --with-pdf 安装。
+# render-docx 走 pandoc；python-docx 已在上方装好作为备用。
