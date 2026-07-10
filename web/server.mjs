@@ -257,7 +257,11 @@ const server = http.createServer(async (req, res) => {
       const f = path.join(sid ? (up ? wsUp(sid) : wsOut(sid)) : (up ? UPLOADS : OUTPUTS), name)
       if (!name || !fs.existsSync(f) || !fs.statSync(f).isFile()) return send(res, 404, "text/plain", "not found")
       const MIME = { ".png": "image/png", ".jpg": "image/jpeg", ".jpeg": "image/jpeg", ".gif": "image/gif",
-        ".webp": "image/webp", ".svg": "image/svg+xml", ".bmp": "image/bmp", ".pdf": "application/pdf" }
+        ".webp": "image/webp", ".svg": "image/svg+xml", ".bmp": "image/bmp", ".pdf": "application/pdf",
+        ".html": "text/html; charset=utf-8", ".htm": "text/html; charset=utf-8",
+        ".csv": "text/csv; charset=utf-8", ".tsv": "text/tab-separated-values; charset=utf-8",
+        ".txt": "text/plain; charset=utf-8", ".log": "text/plain; charset=utf-8",
+        ".json": "application/json; charset=utf-8", ".md": "text/plain; charset=utf-8" }
       res.writeHead(200, { "Content-Type": MIME[path.extname(name).toLowerCase()] || "application/octet-stream" })
       return fs.createReadStream(f).pipe(res)
     }
